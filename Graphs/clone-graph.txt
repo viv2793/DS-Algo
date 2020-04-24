@@ -1,0 +1,42 @@
+// Leetcode Problem 133 -
+
+Solution - 
+Idea is to do BFS. While pushing the node into a queue, create its clone and 
+update its value in a map. The map contains (node, clonnednode) as (key val) 
+pair.
+
+Code - 
+
+class Solution {
+public:
+    Node* cloneGraph(Node* node) {
+        if(node == NULL)
+            return NULL;
+        map<Node*, Node*> m;
+        queue<Node*> q;
+        
+        q.push(node);
+        Node* clonedGraphRoot = new Node(node->val);
+        m[node] = clonedGraphRoot;
+        
+        while(!q.empty()){
+            Node* n = q.front(); q.pop();
+            Node* clonedn = m[n];
+            for(auto neigh: n->neighbors){
+                
+                Node* clonedneigh;
+                if(m.find(neigh) == m.end()){
+                    q.push(neigh);
+                    clonedneigh = new Node(neigh->val);
+                    m[neigh] = clonedneigh;
+                }else{
+                    clonedneigh = m[neigh];
+                }
+                clonedn->neighbors.push_back(clonedneigh);
+                
+            }
+        }
+        return clonedGraphRoot;
+    }
+};
+
