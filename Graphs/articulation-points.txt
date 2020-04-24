@@ -1,0 +1,80 @@
+Articulation Points and Bridges
+Definition - 
+    In a graph, a vertex is called an articulation point if removing it and 
+    all the edges associated with it results in the increase of number of the 
+    connected components in the graph.
+
+
+Bridges
+Definition -
+    An edge in a graph between vertices say u and v is called a Bridge, if after 
+    removing it, there will be no path left between u and v. It's definition is 
+    very similar to that of Articulation Points. Just like them it also represents
+    vulnerabilities in the given network.
+
+
+Leetcode Problem No - 1192 
+(Need to return all the bridges in a graph)
+
+Solution -
+    // Brute Force Algo - 
+    // Remove an edge between u and v from the graph and see if we can reach v from
+    // u. If not, then this edge is a brige.
+    // 
+    // Using Tarjan's Algo -
+    // Idea is to do DFS for every vertex and associate visited and low time to 
+    // every vertex and check if there exists a vertex which has 
+    // visited time < low time of adjacent vertex.
+    // While doing coming back from DFS for every vertex, compute low time for curr
+    // vertex. Low time(curr) = min(Low-time(curr), Low time(all adjacent vertices))   
+    // While visiting every vertex if adjacent vertex is already seen then compute 
+    // low time as below-
+    // Low time(curr) = min(Low-time(curr), visited time(adjacent vertex))
+    // For finding articulation point just check if root has two/more than two childs
+    // then it is also an articulation point. - 
+
+
+    class Solution {
+    public:
+        unordered_map<int, int> visitedTime;
+        unordered_map<int, int> lowTime;
+        unordered_map<int, int> parent;
+        int time = 0;
+        
+        void dfs(vector<vector<int>> &adj, set<int> &visited, vector<vector<int>> &ans, int curr, int parentNode){
+            visited.insert(curr);
+            parent[curr] = parentNode;
+            visitedTime[curr] = time;
+            lowTime[curr] = time;
+            time++;
+            for(auto neigh: adj[curr]){
+                if(neigh == parent[curr])
+                    continue;
+                if(visited.find(neigh) == visited.end()){
+                    dfs(adj, visited, ans, neigh, curr);
+                    
+                    lowTime[curr] = min(lowTime[curr], lowTime[neigh]); 
+                    if(visitedTime[curr] < lowTime[neigh]){
+                        ans.push_back({curr, neigh});
+                    }
+                }else{
+                    lowTime[curr] = min(lowTime[curr], visitedTime[neigh]);
+                }
+            }
+            return;
+        }
+        
+        // main function 
+        vector<vector<int>> criticalConnections(int n, vector<vector<int>>& connections) {
+            vector<vector<int>> ans;
+            vector<vector<int>> adj(n);
+            for(auto connection : connections){
+                adj[connection[0]].push_back(connection[1]);
+                adj[connection[1]].push_back(connection[0]);
+            }
+            set<int> visited;
+            dfs(adj, visited, ans, 0, -1);
+            
+            return ans;
+        }
+    };
